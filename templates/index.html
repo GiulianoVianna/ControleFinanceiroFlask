@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Contas a Pagar e Receber</title>
+</head>
+
+<body>
+    <h1>Contas a Pagar e Receber</h1>
+    <h5>Tipo de Movimento</h5>
+    <form action="{{ url_for('cadastrar_transacao') }}" method="POST">
+        <label for="data">Data:</label>
+        <input type="date" name="data" id="data" required>
+        <br>
+        <label for="descricao">Descrição:</label>
+        <input type="text" name="descricao" id="descricao" required>
+        <br>
+        <label>
+            <input type="radio" name="tipo" id="radio" value="Crédito" required> Entrada
+        </label>
+        <label>
+            <input type="radio" name="tipo" id="radio" value="Débito" required> Saida
+        </label>
+        <br>
+        <label for="valor">Valor:</label>
+        <input type="number" name="valor" id="valor" step="0.01" min="0" required>
+        <br>
+        <input type="submit" value="Cadastrar" id="botao">
+    </form>
+    <div class="filtro-data">
+        <label for="filtro-data">Filtrar por data:</label>
+        <input type="date" name="filtro-data" id="filtro-data">
+        <button id="filtrar">Filtrar</button>
+        <button id="mostrar-todos">Mostrar todos</button>
+    </div>
+    <div class="resumo">
+        <div class="entradas">
+            <strong>Entradas:</strong> R$ {{ '{:,.2f}'.format(entradas).replace(',', 'x').replace('.', ',').replace('x',
+            '.') }}
+        </div>
+        <div class="saidas">
+            <strong>Saídas:</strong> R$ {{ '{:,.2f}'.format(saidas).replace(',', 'x').replace('.', ',').replace('x',
+            '.') }}
+        </div>
+        <div class="saldo">
+            <strong>Saldo Atual:</strong> R$ {{ '{:,.2f}'.format(saldo_atual).replace(',', 'x').replace('.',
+            ',').replace('x', '.') }}
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th class="col-data">Data</th>
+            <th class="col-descricao">Descrição</th>
+            <th class="col-tipo">Tipo</th>
+            <th class="col-valor">Valor</th>
+        </tr>
+        {% for transacao in transacoes %}
+        <tr>
+            <td>{{ transacao['data'] }}</td>
+            <td>{{ transacao['descricao'] }}</td>
+            <td>{{ transacao['tipo'] }}</td>
+            <td>{{ '{:,.2f}'.format(transacao['valor']).replace(',', 'x').replace('.', ',').replace('x', '.') }}<button
+                    class="excluir" data-id="{{ transacao['id'] }}">Excluir</button></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+<script>
+    document.getElementById('filtrar').addEventListener('click', function () {
+        const dataFiltro = document.getElementById('filtro-data').value;
+        const url = dataFiltro ? `/filtrar/${dataFiltro}` : '/';
+        window.location.href = url;
+    });
+
+    document.getElementById('mostrar-todos').addEventListener('click', function () {
+        window.location.href = '/';
+    });
+
+    const excluirBotoes = document.querySelectorAll('.excluir');
+    excluirBotoes.forEach(function (botao) {
+        botao.addEventListener('click', function (e) {
+            const id = e.target.getAttribute('data-id');
+            fetch(`/excluir/${id}`, {
+                method: 'DELETE'
+            }).then(function (response) {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Erro ao excluir a transação');
+                }
+            });
+        });
+    });
+
+</script>
+
+</html>
