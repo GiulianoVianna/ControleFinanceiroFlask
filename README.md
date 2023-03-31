@@ -1,4 +1,4 @@
-# Coontrole Financeiro
+# Controle Financeiro
 Controle de finanças - HTML, CSS e Python.
 
 ## Definição da Aplicação
